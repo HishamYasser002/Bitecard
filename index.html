@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bitecard">
+<title>Bitecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F6F1;--surface:#FFFFFF;--ink:#17202B;--muted:#5D6B78;--line:#D5E0D8;
+  --tomato:#F2542D;--sun:#FFC530;--leaf:#2FA36B;--soft:#E6EEE8;
+  --display:"Bricolage Grotesque",ui-rounded,"SF Pro Rounded",system-ui,sans-serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#111916;--surface:#1A2420;--ink:#EAF2EC;--muted:#9AAAA2;--line:#2B3933;
+    --tomato:#FF6B47;--sun:#FFD25A;--leaf:#45C485;--soft:#222E29;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111916;--surface:#1A2420;--ink:#EAF2EC;--muted:#9AAAA2;--line:#2B3933;
+  --tomato:#FF6B47;--sun:#FFD25A;--leaf:#45C485;--soft:#222E29;color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+img{max-width:100%;display:block}
+.wrap{max-width:520px;margin:0 auto;padding:16px 18px 110px}
+.hidden{display:none!important}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.35rem}
+.date{color:var(--muted);font-size:.9rem}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.9rem}
+
+/* meter */
+.meter{padding:6px 0 18px}
+.left{font-family:var(--display);font-weight:800;font-size:clamp(3.4rem,17vw,5rem);line-height:.95;font-variant-numeric:tabular-nums}
+.left.over{color:var(--tomato)}
+.left-sub{color:var(--muted);margin-top:6px}
+.bar{height:16px;border-radius:8px;background:var(--soft);margin-top:16px;overflow:hidden;position:relative}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--leaf);border-radius:8px;transition:width .5s ease,background .3s}
+.bar.warn>i{background:var(--sun)}
+.bar.over>i{background:var(--tomato)}
+.banner{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:.95rem;border:1px solid}
+.banner.warn{background:color-mix(in srgb,var(--sun) 18%,transparent);border-color:color-mix(in srgb,var(--sun) 60%,transparent)}
+.banner.over{background:color-mix(in srgb,var(--tomato) 14%,transparent);border-color:color-mix(in srgb,var(--tomato) 55%,transparent)}
+.banner.low{background:color-mix(in srgb,var(--leaf) 12%,transparent);border-color:color-mix(in srgb,var(--leaf) 45%,transparent)}
+
+.primary{display:block;width:100%;border:0;border-radius:14px;padding:16px;background:var(--ink);color:var(--paper);font-weight:700;font-size:1.05rem}
+.primary:disabled{opacity:.45}
+.secondary{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-weight:500}
+.section{margin-top:26px}
+.section h2{font-size:1.15rem;margin-bottom:10px}
+.muted{color:var(--muted)}
+
+/* entries */
+.entries{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.entries li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;background:var(--soft);flex:none;display:grid;place-items:center;font-size:1.3rem}
+.entries .name{flex:1;min-width:0}
+.entries .name b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.entries .name small{color:var(--muted)}
+.kcal{font-variant-numeric:tabular-nums;font-weight:700}
+.del{border:0;background:none;color:var(--muted);padding:6px 8px;border-radius:8px;font-size:.85rem}
+.del.armed{background:var(--tomato);color:#fff}
+
+/* coach */
+.coach{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.coach p{margin:0 0 10px;white-space:pre-wrap}
+
+/* mystery slot */
+.slot{border:2px dashed var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center}
+.slot .q{width:56px;height:76px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.8rem;color:#fff;background:repeating-linear-gradient(45deg,#6B4EFF 0 8px,#5A3EE8 8px 16px)}
+.slot.ready{border-style:solid;border-color:#6B4EFF}
+.progress-dots{display:flex;gap:6px;margin-top:6px}
+.progress-dots span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.progress-dots span.on{background:#6B4EFF}
+
+/* tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+.tabs button{flex:1;max-width:173px;border:0;background:none;padding:12px 0 14px;color:var(--muted);font-weight:500;font-size:.9rem}
+.tabs button[aria-selected="true"]{color:var(--ink);font-weight:700;box-shadow:inset 0 3px 0 var(--ink)}
+
+/* overlay sheet */
+.overlay{position:fixed;inset:0;background:rgba(10,15,12,.5);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:520px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet h2{font-size:1.3rem;margin-bottom:14px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center}
+.pick{display:flex;align-items:center;justify-content:center;gap:10px;border:2px dashed var(--line);border-radius:14px;min-height:150px;overflow:hidden;position:relative;cursor:pointer}
+.pick img{width:100%;max-height:260px;object-fit:cover}
+.pick input{position:absolute;opacity:0;width:1px;height:1px}
+label.f{display:block;font-size:.85rem;color:var(--muted);margin:14px 0 4px}
+.field{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:12px;font-size:1rem}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.status{font-size:.9rem;margin-top:10px;min-height:1.2em}
+.ai-out{background:var(--soft);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.92rem}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.overwarn{border:1px solid var(--tomato);border-radius:12px;padding:12px;margin-top:14px;background:color-mix(in srgb,var(--tomato) 10%,transparent)}
+
+/* history */
+.chart{width:100%;height:auto;display:block}
+.stats{display:flex;gap:12px;margin:14px 0}
+.stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat b{display:block;font-family:var(--display);font-size:1.8rem;font-weight:800;line-height:1.1}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.mini{border:0;padding:0;background:none;text-align:left}
+.card{position:relative;aspect-ratio:5/7;border-radius:18px;overflow:hidden;color:#fff;display:flex;flex-direction:column;box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
+.card .stage{flex:1;position:relative;overflow:hidden}
+.card .info{padding:12px 14px 14px;background:rgba(0,0,0,.28);backdrop-filter:blur(4px)}
+.card h3{font-size:1.15rem;line-height:1.15}
+.card p{margin:4px 0 0;font-size:.85rem;line-height:1.35;opacity:.95}
+.card .rar{position:absolute;top:10px;left:12px;font-size:.72rem;font-weight:700;background:rgba(0,0,0,.3);padding:3px 9px;border-radius:999px;z-index:2}
+.mini .card h3{font-size:.95rem}
+.mini .card p{display:none}
+.mini .card .info{padding:8px 10px}
+.card.legendary::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 45%,transparent 60%);background-size:250% 100%;animation:foil 3s linear infinite;pointer-events:none}
+@keyframes foil{from{background-position:150% 0}to{background-position:-100% 0}}
+.bg-sunrise{background:linear-gradient(160deg,#FF8A3D,#F2542D 55%,#B8326B)}
+.bg-lagoon{background:linear-gradient(160deg,#20C3B0,#1272C4)}
+.bg-grape{background:linear-gradient(160deg,#8A6BFF,#4A2FC9)}
+.bg-lime{background:linear-gradient(160deg,#B6E33A,#2FA36B)}
+.bg-bubblegum{background:linear-gradient(160deg,#FF8FC7,#E0457B)}
+.bg-midnight{background:linear-gradient(160deg,#304A7A,#141B3A)}
+
+/* scenes */
+.cast{position:absolute;font-size:3.2rem;line-height:1;will-change:transform}
+.mini .cast{font-size:2rem}
+.s-dance .cast{bottom:22%;animation:bounce .7s ease-in-out infinite alternate}
+@keyframes bounce{from{transform:translateY(0) rotate(-8deg)}to{transform:translateY(-38%) rotate(8deg)}}
+.s-orbit .ring{position:absolute;inset:0;animation:spin 5s linear infinite}
+.s-orbit .ring .cast{animation:spin 5s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.s-parade .cast{top:42%;animation:march 4.5s linear infinite}
+@keyframes march{from{left:-30%}to{left:110%}}
+.s-rocket .cast{left:40%;animation:launch 3s ease-in infinite}
+@keyframes launch{0%{top:110%;transform:translateX(0)}50%{transform:translateX(-12px)}100%{top:-40%;transform:translateX(10px)}}
+.s-rain .cast{top:-20%;font-size:2.2rem;animation:fall 2.6s linear infinite}
+.mini .s-rain .cast{font-size:1.4rem}
+@keyframes fall{to{top:110%;transform:rotate(200deg)}}
+.s-wobble .cast{left:50%;top:50%;font-size:5rem;animation:wob 1.4s ease-in-out infinite}
+.mini .s-wobble .cast{font-size:3rem}
+@keyframes wob{0%,100%{transform:translate(-50%,-50%) rotate(-14deg) scale(1)}50%{transform:translate(-50%,-50%) rotate(14deg) scale(1.15)}}
+
+/* reveal */
+.reveal{perspective:1200px;width:min(78vw,340px);margin:0 auto}
+.flip{position:relative;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.8,.2,1.1)}
+.flip.done{transform:rotateY(180deg)}
+.face{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.back{position:absolute;inset:0;transform:rotateY(180deg)}
+.cardback{aspect-ratio:5/7;border-radius:18px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#6B4EFF 0 14px,#5A3EE8 14px 28px);color:#fff;font-family:var(--display);font-weight:800;font-size:5rem;box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
+.flip.loading .cardback{animation:shake .5s ease-in-out infinite}
+@keyframes shake{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.center{text-align:center}
+.loading-screen{min-height:60vh;display:grid;place-items:center;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="loading" class="loading-screen">Opening your tracker…</div>
+
+  <!-- setup -->
+  <section id="setup" class="hidden">
+    <div class="brand" style="margin:20px 0 6px">Bitecard</div>
+    <h1 style="font-size:2rem;line-height:1.1;margin-bottom:12px">Set your daily calorie target</h1>
+    <p class="muted">A common starting point is your maintenance calories minus about 500. A doctor or an online TDEE calculator can give you that number. Targets below 1,200 kcal aren't allowed here, because going too low tends to backfire.</p>
+    <label class="f" for="goalInput">Daily target (kcal)</label>
+    <input id="goalInput" class="field" type="number" inputmode="numeric" min="1200" max="5000" placeholder="e.g. 2100">
+    <div id="goalErr" class="status" style="color:var(--tomato)"></div>
+    <div class="actions"><button id="goalSave" class="primary">Start tracking</button></div>
+  </section>
+
+  <!-- today -->
+  <section id="vToday" class="hidden">
+    <div class="top">
+      <div><div class="brand">Bitecard</div><div class="date" id="todayDate"></div></div>
+      <button class="iconbtn" id="openSettings">Target</button>
+    </div>
+    <div class="meter">
+      <div class="left" id="leftNum">0</div>
+      <div class="left-sub" id="leftSub"></div>
+      <div class="bar" id="bar"><i id="barFill" style="width:0"></i></div>
+      <div id="banner"></div>
+    </div>
+    <button class="primary" id="openLog">Log food or drink</button>
+
+    <div class="section">
+      <h2>Today's card</h2>
+      <div id="slot"></div>
+    </div>
+
+    <div class="section">
+      <h2>Coach</h2>
+      <div class="coach">
+        <p id="coachText" class="muted">Log something and ask for advice on what to eat next.</p>
+        <button class="secondary" id="askCoach">Ask the coach</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Eaten today</h2>
+      <ul class="entries" id="entries"></ul>
+      <p class="muted" id="emptyNote">Nothing logged yet. Tap "Log food or drink" to add your first item.</p>
+    </div>
+  </section>
+
+  <!-- history -->
+  <section id="vHistory" class="hidden">
+    <div class="top"><div class="brand">Last 7 days</div></div>
+    <div class="stats">
+      <div class="stat"><b id="streak">0</b><span class="muted">day card streak</span></div>
+      <div class="stat"><b id="onTrack">0/7</b><span class="muted">days within target</span></div>
+    </div>
+    <svg id="chart" class="chart" viewBox="0 0 340 190" role="img" aria-label="Calories per day for the last 7 days"></svg>
+    <p class="muted" style="font-size:.85rem">The dashed line is your daily target.</p>
+  </section>
+
+  <!-- cards -->
+  <section id="vCards" class="hidden">
+    <div class="top"><div class="brand">Your cards</div><span class="muted" id="cardCount"></span></div>
+    <div class="grid" id="cardGrid"></div>
+    <p class="muted" id="cardsEmpty">No cards yet. Log 2 things in a day to unlock your first one.</p>
+  </section>
+</div>
+
+<nav class="tabs hidden" id="tabs" role="tablist">
+  <button role="tab" data-v="vToday" aria-selected="true">Today</button>
+  <button role="tab" data-v="vHistory" aria-selected="false">History</button>
+  <button role="tab" data-v="vCards" aria-selected="false">Cards</button>
+</nav>
+
+<!-- log sheet -->
+<div class="overlay hidden" id="logOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <div class="sheet-head"><h2 id="logTitle">Log food or drink</h2><button class="iconbtn" data-close="logOverlay">Close</button></div>
+    <label class="pick" id="pick">
+      <span id="pickText" class="muted">Tap to take a photo or choose one</span>
+      <img id="preview" class="hidden" alt="Photo of your food">
+      <input type="file" id="photo" accept="image/*">
+    </label>
+    <label class="f" for="note">What is it? (optional, helps the estimate)</label>
+    <input id="note" class="field" placeholder="e.g. chicken shawarma, large">
+    <button class="secondary" id="estimate" style="margin-top:12px;width:100%">Estimate calories with AI</button>
+    <div class="status muted" id="estStatus"></div>
+    <div class="ai-out hidden" id="aiOut"></div>
+    <div class="row">
+      <div><label class="f" for="fName">Name</label><input id="fName" class="field" placeholder="Food name"></div>
+      <div style="flex:.6"><label class="f" for="fKcal">Calories</label><input id="fKcal" class="field" type="number" inputmode="numeric" min="0" max="5000" placeholder="kcal"></div>
+    </div>
+    <div id="overWarn"></div>
+    <div class="actions"><button class="primary" id="saveEntry">Save to today</button></div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="overlay hidden" id="setOverlay">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="sheet-head"><h2 id="setTitle">Daily target</h2><button class="iconbtn" data-close="setOverlay">Close</button></div>
+    <label class="f" for="goalEdit">Daily target (kcal, 1,200 minimum)</label>
+    <input id="goalEdit" class="field" type="number" inputmode="numeric" min="1200" max="5000">
+    <div id="goalEditErr" class="status" style="color:var(--tomato)"></div>
+    <div class="actions"><button class="primary" id="goalEditSave">Save target</button></div>
+  </div>
+</div>
+
+<!-- card viewer -->
+<div class="overlay hidden" id="cardOverlay" style="align-items:center">
+  <div style="width:100%;max-width:520px;padding:20px">
+    <div class="reveal"><div class="flip" id="flip">
+      <div class="face front"><div class="cardback">?</div></div>
+      <div class="face back" id="cardBack"></div>
+    </div></div>
+    <p class="center" id="revealMsg" style="color:#fff;margin-top:16px;min-height:1.5em"></p>
+    <div class="center"><button class="iconbtn" data-close="cardOverlay">Close</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const MIN_GOAL=1200, UNLOCK=2;
+let db=null, uid=null, sample=null, canImages=false;
+const mem={};
+let S={goal:null,date:null,today:{entries:[],card:null},index:{},cards:[]};
+let pendingFile=null, pendingThumb=null, overConfirmed=false;
+
+/* ---------- storage ---------- */
+const LS='bitecard:';
+async function sget(k){
+  if(db&&uid){try{const s=await db.doc(`data/users/${uid}/${k}`).get();if(s.exists)return s.data();}catch(e){console.warn(e)}}
+  try{const v=localStorage.getItem(LS+k);if(v)return JSON.parse(v);}catch(e){}
+  return mem[k]??null;
+}
+async function sset(k,v){
+  mem[k]=v;
+  try{localStorage.setItem(LS+k,JSON.stringify(v));}catch(e){}
+  if(db&&uid){try{await db.doc(`data/users/${uid}/${k}`).set(v);}catch(e){console.warn(e)}}
+}
+
+/* ---------- helpers ---------- */
+const dkey=d=>{const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const fmt=n=>Math.round(n).toLocaleString();
+const total=()=>S.today.entries.reduce((a,e)=>a+(e.kcal||0),0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function errCopy(code){
+  return ({rate_limited:'Too many requests right now. Try again in a minute.',session_expired:'Sign in to Claude again, then retry.',image_rejected:'That photo could not be read. Try another one.',refused:'The AI could not help with that. Try a different photo or note.',invalid_json:'The AI reply was garbled. Tap to try again.',not_granted:'AI is turned off for this app. You can still log calories by hand.',sampling_disabled:'AI is not available on this account. You can still log by hand.'})[code]||'Something went wrong reaching the AI. Try again.';
+}
+const AI_GONE=['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
+function aiFailed(e){if(AI_GONE.includes(e.code)){sample=null;renderAiAvail();}}
+
+/* ---------- init ---------- */
+async function init(){
+  try{
+    if(window.claude){
+      const [d,u,sm]=await Promise.all([claude.use('db'),claude.use('user'),claude.use('sample')]);
+      sample=sm||null;
+      if(u){try{uid=await u.id();}catch(e){}}
+      if(d&&uid)db=d;
+      if(sample){const lim=await sample.limits().catch(()=>null);canImages=!!(lim&&lim.images);}
+    }
+  }catch(e){console.warn(e)}
+  const st=await sget('settings');
+  S.goal=st&&st.goal?st.goal:null;
+  await loadDay();
+  S.index=(await sget('index'))||{};
+  S.cards=((await sget('cards'))||{}).list||[];
+  $('#loading').classList.add('hidden');
+  if(!S.goal){$('#setup').classList.remove('hidden');}
+  else showApp();
+}
+async function loadDay(){
+  S.date=dkey();
+  S.today=(await sget('day-'+S.date))||{entries:[],card:null};
+  if(!Array.isArray(S.today.entries))S.today.entries=[];
+}
+function showApp(){
+  $('#setup').classList.add('hidden');
+  $('#tabs').classList.remove('hidden');
+  switchView('vToday');
+  renderAiAvail();
+}
+document.addEventListener('visibilitychange',async()=>{
+  if(document.visibilityState==='visible'&&S.goal&&dkey()!==S.date){await loadDay();renderToday();}
+});
+
+/* ---------- goal ---------- */
+function validGoal(v){const n=parseInt(v,10);if(!n||n<MIN_GOAL)return'Use at least 1,200 kcal. Lower targets are hard to sustain and can be unsafe.';if(n>5000)return'That looks too high. Use 5,000 kcal or less.';return null}
+$('#goalSave').onclick=async()=>{
+  const v=$('#goalInput').value,err=validGoal(v);
+  $('#goalErr').textContent=err||'';if(err)return;
+  S.goal=parseInt(v,10);await sset('settings',{goal:S.goal});showApp();
+};
+$('#openSettings').onclick=()=>{$('#goalEdit').value=S.goal;$('#goalEditErr').textContent='';open('setOverlay')};
+$('#goalEditSave').onclick=async()=>{
+  const v=$('#goalEdit').value,err=validGoal(v);
+  $('#goalEditErr').textContent=err||'';if(err)return;
+  S.goal=parseInt(v,10);await sset('settings',{goal:S.goal});close('setOverlay');renderToday();
+};
+
+/* ---------- views ---------- */
+function switchView(id){
+  ['vToday','vHistory','vCards'].forEach(v=>$('#'+v).classList.toggle('hidden',v!==id));
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===id));
+  if(id==='vToday')renderToday();if(id==='vHistory')renderHistory();if(id==='vCards')renderCards();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
+function open(id){$('#'+id).classList.remove('hidden')}
+function close(id){$('#'+id).classList.add('hidden')}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>close(b.dataset.close));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
+
+function renderAiAvail(){
+  $('#estimate').classList.toggle('hidden',!sample);
+  $('#askCoach').classList.toggle('hidden',!sample);
+  if(!sample)$('#coachText').textContent='AI coaching is unavailable here. Your logging still works.';
+}
+
+/* ---------- today ---------- */
+function renderToday(){
+  const d=new Date();
+  $('#todayDate').textContent=d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+  const t=total(),g=S.goal,left=g-t,pct=Math.min(100,t/g*100);
+  const ln=$('#leftNum');
+  ln.textContent=left>=0?fmt(left):'+'+fmt(-left);
+  ln.classList.toggle('over',left<0);
+  $('#leftSub').textContent=left>=0?`kcal left of ${fmt(g)} · ${fmt(t)} eaten`:`kcal over your ${fmt(g)} target`;
+  const bar=$('#bar');bar.className='bar'+(t>g?' over':t>=g*.8?' warn':'');
+  $('#barFill').style.width=pct+'%';
+  let b='';
+  if(t>g)b=`<div class="banner over">You're ${fmt(t-g)} kcal over today. No panic: one day doesn't undo your progress. Keep the rest of today light and get back on track tomorrow.</div>`;
+  else if(t>=g*.8)b=`<div class="banner warn">Heads up: only ${fmt(left)} kcal left today. Pick something light, like vegetables, soup, yogurt or lean protein.</div>`;
+  else if(d.getHours()>=19&&S.today.entries.length>0&&t<g*.55)b=`<div class="banner low">You've had ${fmt(t)} kcal so far. Eating far below your target can backfire, so make sure you get a proper meal in.</div>`;
+  $('#banner').innerHTML=b;
+  const ul=$('#entries');
+  ul.innerHTML=S.today.entries.map(e=>`<li data-id="${esc(e.id)}">${e.thumb?`<img class="thumb" src="${esc(e.thumb)}" alt="">`:'<div class="thumb">🍽️</div>'}<div class="name"><b>${esc(e.name)}</b><small>${esc(e.time||'')}</small></div><span class="kcal">${fmt(e.kcal)}</span><button class="del" aria-label="Remove ${esc(e.name)}">✕</button></li>`).join('');
+  $('#emptyNote').classList.toggle('hidden',S.today.entries.length>0);
+  ul.querySelectorAll('.del').forEach(btn=>btn.onclick=()=>armDelete(btn));
+  renderSlot();
+}
+function armDelete(btn){
+  if(btn.classList.contains('armed')){
+    const id=btn.closest('li').dataset.id;
+    S.today.entries=S.today.entries.filter(e=>e.id!==id);saveDay();renderToday();return;
+  }
+  btn.classList.add('armed');btn.textContent='Remove';
+  setTimeout(()=>{btn.classList.remove('armed');btn.textContent='✕'},3000);
+}
+async function saveDay(){
+  S.index[S.date]={kcal:total(),goal:S.goal,card:!!S.today.card};
+  await sset('day-'+S.date,S.today);await sset('index',S.index);
+}
+
+/* ---------- mystery slot ---------- */
+function renderSlot(){
+  const n=S.today.entries.length,slot=$('#slot');
+  if(S.today.card){
+    slot.innerHTML=`<button class="mini" id="slotCard" style="width:140px" aria-label="Open today's card"></button><p class="muted" style="margin-top:8px">Unlocked! Come back tomorrow for a new one.</p>`;
+    $('#slotCard').appendChild(cardEl(S.today.card,true));
+    $('#slotCard').onclick=()=>showCard(S.today.card);
+    return;
+  }
+  const ready=n>=UNLOCK;
+  slot.innerHTML=`<div class="slot ${ready?'ready':''}"><div class="q">?</div><div style="flex:1">${ready?'<b>Your card is ready</b><div class="muted" style="font-size:.9rem">Something silly is waiting.</div><button class="primary" id="revealBtn" style="margin-top:10px;padding:12px">Reveal today\'s card</button>':`<b>Log ${UNLOCK} things to unlock</b><div class="progress-dots">${Array.from({length:UNLOCK},(_,i)=>`<span class="${i<n?'on':''}"></span>`).join('')}</div>`}</div></div>`;
+  if(ready)$('#revealBtn').onclick=revealCard;
+}
+
+const SCENES=['dance','orbit','parade','rocket','rain','wobble'];
+const BGS=['sunrise','lagoon','grape','lime','bubblegum','midnight'];
+const FALLBACK=[
+  {title:'Broccoli Gym Bro',caption:'Never skips leg day. Has no legs. Respect the commitment.',cast:['🥦','💪','🏋️'],scene:'dance',bg:'lime'},
+  {title:'The Carrot Launch',caption:'Mission control confirms: vegetables have reached orbit. Your snack drawer is next.',cast:['🥕','🚀'],scene:'rocket',bg:'midnight'},
+  {title:'Avocado Parade',caption:'They marched for you today. Mostly because you logged your food. Partly for toast.',cast:['🥑','🥑','🎺'],scene:'parade',bg:'lagoon'},
+  {title:'Penguin Meal Prep',caption:'Three penguins, one container each. Organized, chilly, unstoppable.',cast:['🐧','🍱','🐧'],scene:'orbit',bg:'grape'},
+  {title:'It\'s Raining Apples',caption:'Forecast: 100% chance of good decisions with scattered crunch.',cast:['🍎','🍏'],scene:'rain',bg:'sunrise'},
+  {title:'Disco Watermelon',caption:'Hydrated. Fabulous. Refuses to leave the dance floor.',cast:['🍉'],scene:'wobble',bg:'bubblegum'}
+];
+function rollRarity(){const r=Math.random();return r<.05?'legendary':r<.25?'rare':'common'}
+function normalizeCard(c){
+  const cast=(Array.isArray(c.cast)?c.cast:[]).map(String).filter(Boolean).slice(0,3);
+  return{title:String(c.title||'Mystery Snack').slice(0,40),caption:String(c.caption||'').slice(0,140),cast:cast.length?cast:['🍓'],scene:SCENES.includes(c.scene)?c.scene:SCENES[Math.floor(Math.random()*SCENES.length)],bg:BGS.includes(c.bg)?c.bg:BGS[Math.floor(Math.random()*BGS.length)]};
+}
+async function revealCard(){
+  const flip=$('#flip');flip.className='flip loading';$('#cardBack').innerHTML='';
+  $('#revealMsg').textContent='Shuffling the deck…';open('cardOverlay');
+  const t=total(),g=S.goal,status=t<=g?`stayed within their ${g} kcal target so far (${t} kcal)`:`went ${t-g} kcal over their target today`;
+  const recent=S.cards.slice(-8).map(c=>c.title).join('; ')||'none';
+  let card=null;
+  if(sample){
+    try{
+      card=await sample.json(`You create one daily "mystery card" for a calorie-tracking app to keep the user motivated. The user ${status}. Invent a short, absurd, funny scene starring food, animals or everyday objects shown as emoji. Be kind and encouraging: never shame the user about food, weight or body. Do not use real people, brands or copyrighted characters. Avoid repeating these recent titles: ${recent}.
+Reply with only JSON:
+{"title": "max 4 words", "caption": "one funny sentence, max 20 words", "cast": ["1 to 3 single emoji"], "scene": one of ${JSON.stringify(SCENES)}, "bg": one of ${JSON.stringify(BGS)}}`,{modelTier:'quick',cache:false});
+    }catch(e){aiFailed(e);card=null}
+  }
+  if(!card){const used=new Set(S.cards.map(c=>c.title));card=FALLBACK.find(c=>!used.has(c.title))||FALLBACK[Math.floor(Math.random()*FALLBACK.length)];}
+  card=normalizeCard(card);card.rarity=rollRarity();card.date=S.date;
+  S.today.card=card;S.cards.push(card);if(S.cards.length>400)S.cards=S.cards.slice(-400);
+  await saveDay();await sset('cards',{list:S.cards});
+  $('#cardBack').appendChild(cardEl(card,false));
+  flip.className='flip';requestAnimationFrame(()=>requestAnimationFrame(()=>flip.classList.add('done')));
+  $('#revealMsg').textContent=card.rarity==='legendary'?'LEGENDARY pull! Very rare.':card.rarity==='rare'?'A rare one!':'Card added to your collection.';
+  renderToday();
+}
+function showCard(card){
+  const flip=$('#flip');flip.className='flip done';
+  $('#cardBack').innerHTML='';$('#cardBack').appendChild(cardEl(card,false));
+  $('#revealMsg').textContent=new Date(card.date+'T12:00').toLocaleDateString(undefined,{month:'long',day:'numeric'});
+  open('cardOverlay');
+}
+function cardEl(c,mini){
+  const el=document.createElement('div');
+  el.className=`card bg-${c.bg} ${c.rarity==='legendary'?'legendary':''}`;
+  const stage=document.createElement('div');stage.className='stage s-'+c.scene;
+  const mk=(emo,style)=>{const s=document.createElement('span');s.className='cast';s.textContent=emo;s.setAttribute('aria-hidden','true');Object.assign(s.style,style);return s};
+  const cast=c.cast;
+  if(c.scene==='dance')cast.forEach((e,i)=>stage.appendChild(mk(e,{left:(12+i*(70/Math.max(1,cast.length)))+'%',animationDelay:(i*.18)+'s'})));
+  else if(c.scene==='orbit'){const r=document.createElement('div');r.className='ring';cast.forEach((e,i)=>{const a=i/cast.length*Math.PI*2;r.appendChild(mk(e,{left:`calc(${50+30*Math.cos(a)}% - .5em)`,top:`calc(${50+30*Math.sin(a)}% - .5em)`}))});stage.appendChild(r)}
+  else if(c.scene==='parade')cast.forEach((e,i)=>stage.appendChild(mk(e,{animationDelay:(-i*1.5)+'s'})));
+  else if(c.scene==='rocket')cast.forEach((e,i)=>stage.appendChild(mk(e,{left:(25+i*22)+'%',animationDelay:(-i*.9)+'s'})));
+  else if(c.scene==='rain')for(let i=0;i<10;i++)stage.appendChild(mk(cast[i%cast.length],{left:(i*10+2)+'%',animationDelay:(-(i*0.53)%2.6)+'s',animationDuration:(2.2+(i%3)*.4)+'s'}));
+  else stage.appendChild(mk(cast[0],{}));
+  const rar=document.createElement('span');rar.className='rar';rar.textContent=c.rarity==='legendary'?'★ Legendary':c.rarity==='rare'?'Rare':'Common';
+  const info=document.createElement('div');info.className='info';
+  const h=document.createElement('h3');h.textContent=c.title;
+  const p=document.createElement('p');p.textContent=c.caption;
+  info.append(h,p);el.append(rar,stage,info);
+  return el;
+}
+
+/* ---------- log sheet ---------- */
+$('#openLog').onclick=()=>{
+  pendingFile=null;pendingThumb=null;overConfirmed=false;
+  $('#photo').value='';$('#preview').classList.add('hidden');$('#pickText').classList.remove('hidden');
+  ['#note','#fName','#fKcal'].forEach(s=>$(s).value='');
+  $('#estStatus').textContent='';$('#aiOut').classList.add('hidden');$('#overWarn').innerHTML='';
+  open('logOverlay');
+};
+$('#photo').onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  pendingFile=f;
+  try{pendingThumb=await makeThumb(f,240);$('#preview').src=await makeThumb(f,700,.75);$('#preview').classList.remove('hidden');$('#pickText').classList.add('hidden');}
+  catch(err){$('#estStatus').textContent='That photo could not be opened. Try another one.';pendingFile=null}
+};
+function makeThumb(file,max,q=.6){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{const s=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',q))};
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('img'))};img.src=url;
+  });
+}
+$('#estimate').onclick=async()=>{
+  if(!sample)return;
+  const note=$('#note').value.trim();
+  if(!pendingFile&&!note){$('#estStatus').textContent='Add a photo or describe the food first.';return}
+  const btn=$('#estimate');btn.disabled=true;$('#estStatus').textContent='Looking at your food…';$('#aiOut').classList.add('hidden');
+  const useImg=!!(pendingFile&&canImages);
+  try{
+    const r=await sample.json(`You estimate calories for a food-logging app. ${useImg?'The attached photo shows what the user is eating or drinking.':'There is no photo.'} User's note: "${note||'none'}".
+Estimate the total calories of the portion shown/described. Be realistic about portion size and hidden oils, sauces and sugar in drinks.
+Reply with only JSON: {"name": "short name", "calories": integer, "low": integer, "high": integer, "items": [{"name": string, "calories": integer}], "tip": "one short practical tip, or empty"}
+If it is not food or drink, set name "Not food" and calories 0.`,useImg?{images:pendingFile}:{});
+    const kcal=Math.max(0,Math.round(Number(r.calories)||0));
+    $('#fName').value=String(r.name||note||'Food').slice(0,60);$('#fKcal').value=kcal;
+    const items=Array.isArray(r.items)&&r.items.length>1?r.items.map(i=>`${esc(i.name)} ~${fmt(Number(i.calories)||0)}`).join(', '):'';
+    $('#aiOut').innerHTML=`Estimate: <b>${fmt(kcal)} kcal</b>${r.low&&r.high?` (likely ${fmt(r.low)}–${fmt(r.high)})`:''}${items?`<br>${items}`:''}${r.tip?`<br>${esc(r.tip)}`:''}<br><span class="muted">Adjust the number below if it looks off.</span>`;
+    $('#aiOut').classList.remove('hidden');$('#estStatus').textContent='';
+    if(pendingFile&&!canImages)$('#estStatus').textContent='Photos can\'t be sent to the AI here, so this estimate used your note only.';
+    overConfirmed=false;$('#overWarn').innerHTML='';
+  }catch(e){
+    if(e.code==='images_unavailable')canImages=false;
+    aiFailed(e);$('#estStatus').textContent=errCopy(e.code);
+  }finally{btn.disabled=false}
+};
+['#fKcal'].forEach(s=>$(s).addEventListener('input',()=>{overConfirmed=false;$('#overWarn').innerHTML=''}));
+$('#saveEntry').onclick=async()=>{
+  const kcal=parseInt($('#fKcal').value,10),name=$('#fName').value.trim()||$('#note').value.trim()||'Food';
+  if(isNaN(kcal)||kcal<0||kcal>5000){$('#estStatus').textContent='Enter calories between 0 and 5,000.';return}
+  const after=total()+kcal;
+  if(after>S.goal&&!overConfirmed){
+    overConfirmed=true;
+    $('#overWarn').innerHTML=`<div class="overwarn"><b>This puts you ${fmt(after-S.goal)} kcal over today's target.</b><div style="font-size:.92rem;margin-top:4px">Maybe have half, or swap it for something lighter? If you're eating it anyway, logging it honestly still counts as a win.</div></div>`;
+    $('#saveEntry').textContent='Log it anyway';return;
+  }
+  $('#saveEntry').textContent='Save to today';
+  const now=new Date();
+  S.today.entries.push({id:now.getTime().toString(36),name:name.slice(0,60),kcal,thumb:pendingThumb||null,time:now.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})});
+  close('logOverlay');renderToday();await saveDay();
+  if(sample)quickReact(name,kcal);
+};
+$('#logOverlay').addEventListener('click',()=>{if($('#logOverlay').classList.contains('hidden'))$('#saveEntry').textContent='Save to today'});
+
+/* ---------- coach ---------- */
+function ctx(){
+  const t=total(),h=new Date().getHours();
+  return `Daily target: ${S.goal} kcal. Eaten so far: ${t} kcal. Remaining: ${S.goal-t} kcal. Local time: ${h}:00.
+Logged today: ${S.today.entries.map(e=>`${e.name} (${e.kcal})`).join(', ')||'nothing yet'}.`;
+}
+const RULES=`You are a friendly, practical weight-loss coach inside a calorie tracker. Be encouraging and specific, never shaming. Never suggest skipping meals entirely, extreme restriction, or eating so little that the day ends far below the target. If the user is over target, reassure them that one day is fine and suggest a light plan for the rest of today. Plain text, no markdown.`;
+async function quickReact(name,kcal){
+  const el=$('#coachText');el.classList.remove('muted');el.textContent='…';
+  try{const r=await sample(`${RULES}\n${ctx()}\nThe user just logged "${name}" (${kcal} kcal). React in one short sentence (max 20 words), and add a warning if they are close to or over target.`,{modelTier:'quick',cache:false,onText:({text})=>{el.textContent=text}});el.textContent=r.text}
+  catch(e){aiFailed(e);el.textContent=e.code==='cancelled'?'':errCopy(e.code)}
+}
+$('#askCoach').onclick=async()=>{
+  if(!sample)return;
+  const btn=$('#askCoach'),el=$('#coachText');btn.disabled=true;el.classList.remove('muted');el.textContent='Thinking…';
+  try{const r=await sample(`${RULES}\n${ctx()}\nGive advice for the rest of today in 2–4 short sentences: what to eat next (2 concrete ideas with rough calories that fit the remaining budget), and one motivating note.`,{cache:false,onText:({text})=>{el.textContent=text}});el.textContent=r.text}
+  catch(e){aiFailed(e);el.textContent=e.text||errCopy(e.code)}
+  finally{btn.disabled=false}
+};
+
+/* ---------- history ---------- */
+function renderHistory(){
+  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d)}
+  const rows=days.map(d=>{const k=dkey(d);const r=k===S.date?{kcal:total(),goal:S.goal}:(S.index[k]||null);return{d,k,r}});
+  const max=Math.max(S.goal*1.3,...rows.map(x=>x.r?x.r.kcal:0));
+  const W=340,H=190,top=12,bot=30,ch=H-top-bot,bw=30,gap=(W-7*bw)/8;
+  const css=getComputedStyle(document.documentElement),ink=css.getPropertyValue('--ink'),mut=css.getPropertyValue('--muted'),leaf=css.getPropertyValue('--leaf'),tom=css.getPropertyValue('--tomato'),line=css.getPropertyValue('--line');
+  let s='';
+  rows.forEach((x,i)=>{
+    const xx=gap+i*(bw+gap),v=x.r?x.r.kcal:0,h=v/max*ch,g=x.r?x.r.goal||S.goal:S.goal;
+    s+=`<rect x="${xx}" y="${top+ch-h}" width="${bw}" height="${Math.max(h,0)}" rx="6" fill="${v>g?tom:leaf}"${x.r?'':' opacity=".25"'}/>`;
+    s+=`<text x="${xx+bw/2}" y="${H-10}" text-anchor="middle" font-size="12" fill="${x.k===S.date?ink:mut}" font-family="DM Sans,system-ui">${x.d.toLocaleDateString(undefined,{weekday:'short'}).slice(0,2)}</text>`;
+    if(v)s+=`<text x="${xx+bw/2}" y="${top+ch-h-4}" text-anchor="middle" font-size="9" fill="${mut}" font-family="DM Sans,system-ui">${Math.round(v)}</text>`;
+  });
+  const gy=top+ch-S.goal/max*ch;
+  s=`<line x1="0" x2="${W}" y1="${top+ch}" y2="${top+ch}" stroke="${line}"/><line x1="0" x2="${W}" y1="${gy}" y2="${gy}" stroke="${ink}" stroke-dasharray="5 5" opacity=".6"/>`+s;
+  $('#chart').innerHTML=s;
+  $('#onTrack').textContent=rows.filter(x=>x.r&&x.r.kcal>0&&x.r.kcal<=(x.r.goal||S.goal)).length+'/7';
+  let streak=0;const d=new Date();
+  if(!S.today.card)d.setDate(d.getDate()-1);
+  for(;;){const k=dkey(d),r=k===S.date?{card:!!S.today.card}:S.index[k];if(r&&r.card){streak++;d.setDate(d.getDate()-1)}else break}
+  $('#streak').textContent=streak;
+}
+
+/* ---------- cards ---------- */
+function renderCards(){
+  const g=$('#cardGrid');g.innerHTML='';
+  [...S.cards].reverse().forEach(c=>{const b=document.createElement('button');b.className='mini';b.setAttribute('aria-label','Open card '+c.title);b.appendChild(cardEl(c,true));b.onclick=()=>showCard(c);g.appendChild(b)});
+  $('#cardsEmpty').classList.toggle('hidden',S.cards.length>0);
+  $('#cardCount').textContent=S.cards.length?S.cards.length+' collected':'';
+}
+
+init();
+})();
+</script>
+</body>
+</html>
